@@ -23,6 +23,8 @@ import org.gradle.internal.SystemProperties
 import org.gradle.internal.io.NullOutputStream
 import org.gradle.internal.logging.ConsoleRenderer
 import org.jetbrains.kotlin.assignment.plugin.AssignmentComponentContainerContributor
+import org.jetbrains.kotlin.assignment.plugin.AssignmentComponentRegistrar
+import org.jetbrains.kotlin.assignment.plugin.AssignmentConfigurationKeys
 import org.jetbrains.kotlin.assignment.plugin.CliAssignPluginResolutionAltererExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.CompilerSystemProperties.KOTLIN_COMPILER_ENVIRONMENT_KEEPALIVE_PROPERTY
@@ -51,6 +53,7 @@ import org.jetbrains.kotlin.config.JVMConfigurationKeys.IR
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.JDK_HOME
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.JVM_TARGET
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.OUTPUT_DIRECTORY
+import org.jetbrains.kotlin.config.JVMConfigurationKeys.RETAIN_OUTPUT_IN_MEMORY
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.SAM_CONVERSIONS
 import org.jetbrains.kotlin.config.JvmAnalysisFlags
 import org.jetbrains.kotlin.config.JvmClosureGenerationScheme
@@ -66,7 +69,10 @@ import org.jetbrains.kotlin.extensions.internal.InternalNonStableExtensionPoints
 import org.jetbrains.kotlin.name.NameUtils
 import org.jetbrains.kotlin.resolve.extensions.AssignResolutionAltererExtension
 import org.jetbrains.kotlin.samWithReceiver.CliSamWithReceiverComponentContributor
+import org.jetbrains.kotlin.samWithReceiver.SamWithReceiverComponentRegistrar
+import org.jetbrains.kotlin.samWithReceiver.SamWithReceiverConfigurationKeys
 import org.jetbrains.kotlin.scripting.compiler.plugin.ScriptingCompilerConfigurationComponentRegistrar
+import org.jetbrains.kotlin.scripting.compiler.plugin.ScriptingK2CompilerPluginRegistrar
 import org.jetbrains.kotlin.scripting.compiler.plugin.impl.ScriptJvmCompilerFromEnvironment
 import org.jetbrains.kotlin.scripting.compiler.plugin.toCompilerMessageSeverity
 import org.jetbrains.kotlin.scripting.definitions.ScriptDefinition
@@ -187,12 +193,11 @@ fun compileKotlinScriptModuleTo(
                 put(OUTPUT_DIRECTORY, outputDirectory)
                 setModuleName(moduleName)
                 addScriptingCompilerComponents()
+                put(CommonConfigurationKeys.USE_FIR, true)
+                add(SamWithReceiverConfigurationKeys.ANNOTATION, "org.gradle.api.HasImplicitReceiver")
             }
 
-            val environment = kotlinCoreEnvironmentFor(configuration).apply {
-                HasImplicitReceiverCompilerPlugin.apply(project)
-                KotlinAssignmentCompilerPlugin.apply(project)
-            }
+            val environment = kotlinCoreEnvironmentFor(configuration)
 
             val host = BasicJvmScriptingHost(
                 compiler = JvmScriptCompiler(scriptDef.hostConfiguration, ScriptJvmCompilerFromEnvironment(environment)),
@@ -403,7 +408,7 @@ class LoggingOutputStream(val log: (String) -> Unit) : OutputStream() {
 private
 fun compilerConfigurationFor(messageCollector: MessageCollector, compilerOptions: KotlinCompilerOptions): CompilerConfiguration =
     CompilerConfiguration().apply {
-        put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
+        put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector)
         put(JVM_TARGET, compilerOptions.jvmTarget.toKotlinJvmTarget())
         put(JDK_HOME, File(System.getProperty("java.home")))
         put(IR, true)
@@ -436,7 +441,7 @@ fun gradleKotlinDslLanguageVersionSettingsFor(compilerOptions: KotlinCompilerOpt
     ),
     specificFeatures = mapOf(
         LanguageFeature.DisableCompatibilityModeForNewInference to LanguageFeature.State.ENABLED,
-        LanguageFeature.TypeEnhancementImprovementsInStrictMode to LanguageFeature.State.DISABLED,
+//        LanguageFeature.TypeEnhancementImprovementsInStrictMode to LanguageFeature.State.DISABLED,
     )
 )
 
@@ -455,6 +460,19 @@ fun CompilerConfiguration.addScriptingCompilerComponents() {
         org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar.PLUGIN_COMPONENT_REGISTRARS,
         ScriptingCompilerConfigurationComponentRegistrar()
     )
+    add(
+        org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar.COMPILER_PLUGIN_REGISTRARS,
+        ScriptingK2CompilerPluginRegistrar()
+    )
+    add(
+        org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar.COMPILER_PLUGIN_REGISTRARS,
+        SamWithReceiverComponentRegistrar()
+    )
+    add(
+        org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar.COMPILER_PLUGIN_REGISTRARS,
+        AssignmentComponentRegistrar()
+    )
+    add(AssignmentConfigurationKeys.ANNOTATION, SupportsKotlinAssignmentOverloading::class.qualifiedName!!)
 }
 
 
