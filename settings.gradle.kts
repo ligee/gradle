@@ -2,6 +2,7 @@ import org.gradle.api.internal.FeaturePreviews
 
 pluginManagement {
     repositories {
+        mavenLocal()
         maven {
             url = uri("https://repo.gradle.org/gradle/enterprise-libs-release-candidates")
             content {
@@ -28,6 +29,13 @@ plugins {
     id("io.github.gradle.gradle-enterprise-conventions-plugin").version("0.7.6")
     id("org.gradle.toolchains.foojay-resolver-convention") version("0.8.0")
 //    id("net.ltgt.errorprone").version("3.1.0")
+}
+
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
 }
 
 includeBuild("build-logic-commons")

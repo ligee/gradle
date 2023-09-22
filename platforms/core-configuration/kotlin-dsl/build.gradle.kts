@@ -7,6 +7,11 @@ plugins {
 
 description = "Kotlin DSL Provider"
 
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
 dependencies {
 
     api(project(":kotlin-dsl-tooling-models"))
