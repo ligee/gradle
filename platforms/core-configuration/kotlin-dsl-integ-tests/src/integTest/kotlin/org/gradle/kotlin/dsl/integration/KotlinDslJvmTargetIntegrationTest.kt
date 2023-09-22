@@ -252,7 +252,8 @@ class KotlinDslJvmTargetIntegrationTest : AbstractKotlinIntegrationTest() {
 
     private
     val printScriptJavaClassFileMajorVersion = """
-        println("Java Class Major Version = ${'$'}{org.gradle.internal.serialize.JavaClassUtil.getClassMajorVersion(this::class.java)}")
+        class AClass
+        println("Java Class Major Version = ${'$'}{org.gradle.internal.serialize.JavaClassUtil.getClassMajorVersion(AClass::class.java)}")
     """
 
     private
