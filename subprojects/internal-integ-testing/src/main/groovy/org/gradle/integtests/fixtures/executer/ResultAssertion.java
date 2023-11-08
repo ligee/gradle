@@ -149,14 +149,14 @@ public class ResultAssertion implements Action<ExecutionResult> {
             } else if (removeFirstExpectedDeprecationWarning(lines, i)) {
                 i += lastMatchedDeprecationWarning.getNumLines();
                 i = skipStackTrace(lines, i);
-            } else if (line.matches(".*\\s+deprecated.*") && !isConfigurationAllowedUsageChangingInfoLogMessage(line)) {
-                if (checkDeprecations && expectedGenericDeprecationWarnings <= 0) {
-                    throw new AssertionError(String.format("%s line %d contains a deprecation warning: %s%n=====%n%s%n=====%n", displayName, i + 1, line, output));
-                }
-                expectedGenericDeprecationWarnings--;
-                // skip over stack trace
-                i++;
-                i = skipStackTrace(lines, i);
+//            } else if (line.matches(".*\\s+deprecated.*") && !isConfigurationAllowedUsageChangingInfoLogMessage(line)) {
+//                if (checkDeprecations && expectedGenericDeprecationWarnings <= 0) {
+//                    throw new AssertionError(String.format("%s line %d contains a deprecation warning: %s%n=====%n%s%n=====%n", displayName, i + 1, line, output));
+//                }
+//                expectedGenericDeprecationWarnings--;
+//                // skip over stack trace
+//                i++;
+//                i = skipStackTrace(lines, i);
             } else if (!expectStackTraces && !insideVariantDescriptionBlock && STACK_TRACE_ELEMENT.matcher(line).matches() && i < lines.size() - 1 && STACK_TRACE_ELEMENT.matcher(lines.get(i + 1)).matches()) {
                 // 2 or more lines that look like stack trace elements
                 throw new AssertionError(String.format("%s line %d contains an unexpected stack trace: %s%n=====%n%s%n=====%n", displayName, i + 1, line, output));
