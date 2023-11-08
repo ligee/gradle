@@ -51,6 +51,7 @@ import org.jetbrains.kotlin.config.JVMConfigurationKeys.IR
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.JDK_HOME
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.JVM_TARGET
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.OUTPUT_DIRECTORY
+import org.jetbrains.kotlin.config.JVMConfigurationKeys.RETAIN_OUTPUT_IN_MEMORY
 import org.jetbrains.kotlin.config.JVMConfigurationKeys.SAM_CONVERSIONS
 import org.jetbrains.kotlin.config.JvmAnalysisFlags
 import org.jetbrains.kotlin.config.JvmClosureGenerationScheme
