@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+
 plugins {
     id("gradlebuild.distribution.implementation-kotlin")
 }
@@ -40,4 +42,10 @@ dependencies {
 
 packageCycles {
     excludePatterns.add("org/gradle/kotlin/dsl/provider/plugins/precompiled/tasks/**")
+}
+
+tasks.withType(KotlinCompile::class).configureEach {
+    kotlinOptions { // Deprecated non-lazy configuration options
+        freeCompilerArgs = listOf("-Xskip-prerelease-check")
+    }
 }

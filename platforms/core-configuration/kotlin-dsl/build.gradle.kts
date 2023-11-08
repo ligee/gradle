@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+
 plugins {
     id("gradlebuild.distribution.api-kotlin")
     id("gradlebuild.kotlin-dsl-dependencies-embedded")
@@ -134,8 +136,6 @@ dependencies {
     testFixturesImplementation(libs.asm)
 
     integTestDistributionRuntimeOnly(project(":distributions-basics"))
-    integTestRuntimeOnly(project(":kotlin-dsl-plugins"))
-    integTestLocalRepository(project(":kotlin-dsl-plugins"))
 }
 
 packageCycles {
@@ -146,4 +146,10 @@ testFilesCleanup.reportOnly = true
 
 strictCompile {
     ignoreDeprecations()
+}
+
+tasks.withType(KotlinCompile::class).configureEach {
+    kotlinOptions { // Deprecated non-lazy configuration options
+        freeCompilerArgs = listOf("-Xskip-prerelease-check")
+    }
 }
