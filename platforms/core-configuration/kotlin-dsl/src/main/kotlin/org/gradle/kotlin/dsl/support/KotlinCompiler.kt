@@ -431,8 +431,8 @@ fun JavaVersion.toKotlinJvmTarget(): JvmTarget {
 
 private
 fun gradleKotlinDslLanguageVersionSettingsFor(compilerOptions: KotlinCompilerOptions) = LanguageVersionSettingsImpl(
-    languageVersion = LanguageVersion.KOTLIN_1_8,
-    apiVersion = ApiVersion.KOTLIN_1_8,
+    languageVersion = LanguageVersion.KOTLIN_2_0,
+    apiVersion = ApiVersion.KOTLIN_2_0,
     analysisFlags = mapOf(
         AnalysisFlags.skipMetadataVersionCheck to compilerOptions.skipMetadataVersionCheck,
         AnalysisFlags.skipPrereleaseCheck to true,
@@ -441,7 +441,7 @@ fun gradleKotlinDslLanguageVersionSettingsFor(compilerOptions: KotlinCompilerOpt
     ),
     specificFeatures = mapOf(
         LanguageFeature.DisableCompatibilityModeForNewInference to LanguageFeature.State.ENABLED,
-        LanguageFeature.TypeEnhancementImprovementsInStrictMode to LanguageFeature.State.DISABLED,
+//        LanguageFeature.TypeEnhancementImprovementsInStrictMode to LanguageFeature.State.DISABLED,
     )
 )
 
