@@ -29,7 +29,8 @@ abstract public class KotlinTestTestToolchain extends JUnitPlatformTestToolchain
     /**
      * The default version of KotlinTest to use for compiling and executing tests.
      */
-    public static final String DEFAULT_VERSION = "1.9.22";
+//    public static final String DEFAULT_VERSION = "1.9.22";
+    public static final String DEFAULT_VERSION = "2.0.255-SNAPSHOT";
     private static final String GROUP_NAME = "org.jetbrains.kotlin:kotlin-test-junit5";
 
     @Override
