@@ -274,8 +274,15 @@ dependencyResolutionManagement {
     protected
     fun scriptWithKotlinDslPlugin(version: String? = null): String =
         """
+            kotlin.compiler.runViaBuildToolsApi=true
+
             plugins {
                 `kotlin-dsl`${if (version == null) "" else " version \"$version\""}
+            }
+
+            kotlin {
+                @OptIn(ExperimentalBuildToolsApi::class, ExperimentalKotlinGradlePluginApi::class)
+                useCompilerVersion("2.0.255-SNAPSHOT")
             }
 
             $repositoriesBlock

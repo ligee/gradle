@@ -424,7 +424,7 @@ class GradleKotlinDslIntegrationTest : AbstractKotlinIntegrationTest() {
 
         assertThat(
             buildFailureOutput("tasks"),
-            containsString("e: ${clickableUrlFor(buildFile)}:3:44: Unresolved reference: fooBarVersion")
+            containsString("e: ${clickableUrlFor(buildFile)}:3:44: Unresolved reference: 'fooBarVersion'")
         )
     }
 
@@ -634,8 +634,9 @@ class GradleKotlinDslIntegrationTest : AbstractKotlinIntegrationTest() {
         val buildFile =
             withBuildScript("foo")
 
+        val normaliseLineSeparators = buildFailureOutput().normaliseLineSeparators()
         assertThat(
-            buildFailureOutput().normaliseLineSeparators(),
+            normaliseLineSeparators,
             containsMultiLineString(
                 """
                 FAILURE: Build failed with an exception.
@@ -647,7 +648,7 @@ class GradleKotlinDslIntegrationTest : AbstractKotlinIntegrationTest() {
                 Script compilation error:
 
                   Line 1: foo
-                          ^ Unresolved reference: foo
+                          ^ Unresolved reference 'foo'.
 
                 1 error
                 """
@@ -665,16 +666,12 @@ class GradleKotlinDslIntegrationTest : AbstractKotlinIntegrationTest() {
             containsMultiLineString(
                 """
                 * What went wrong:
-                Script compilation errors:
+                Script compilation error:
 
                   Line 1: publishing { }
-                          ^ Expression 'publishing' cannot be invoked as a function. The function 'invoke()' is not found
+                          ^ Unresolved reference. None of the following candidates is applicable because of receiver type mismatch: [val PluginDependenciesSpec.publishing: PluginDependencySpec]
 
-                  Line 1: publishing { }
-                          ^ Unresolved reference. None of the following candidates is applicable because of receiver type mismatch:${' '}
-                              public val PluginDependenciesSpec.publishing: PluginDependencySpec defined in org.gradle.kotlin.dsl
-
-                2 errors
+                1 error
                 """
             )
         )
@@ -703,13 +700,16 @@ class GradleKotlinDslIntegrationTest : AbstractKotlinIntegrationTest() {
                 containsString(
                     """
                     |  Line 01: println(foo)
-                    |                   ^ Unresolved reference: foo
+                    |                   ^ Unresolved reference 'foo'.
                     |
                     |  Line 06: println("foo").bar.bazar
-                    |                          ^ Unresolved reference: bar
+                    |                          ^ Unresolved reference 'bar'.
                     |
                     |  Line 10: println(cathedral)
-                    |                   ^ Unresolved reference: cathedral
+                    |           ^ Overload resolution ambiguity between candidates: [@InlineOnly() fun println(message: Any?): Unit, @InlineOnly() fun println(message: Boolean): Unit, @InlineOnly() fun println(message: Byte): Unit, ...]
+                    |
+                    |  Line 10: println(cathedral)
+                    |                   ^ Unresolved reference 'cathedral'.
                     """.trimMargin()
                 )
             )
