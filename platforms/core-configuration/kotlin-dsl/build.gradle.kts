@@ -150,6 +150,6 @@ strictCompile {
 
 tasks.withType(KotlinCompile::class).configureEach {
     kotlinOptions { // Deprecated non-lazy configuration options
-        freeCompilerArgs = listOf("-Xskip-prerelease-check")
+        freeCompilerArgs += listOf("-Xskip-prerelease-check")
     }
 }

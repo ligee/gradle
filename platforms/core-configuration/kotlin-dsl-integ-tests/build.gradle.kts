@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinCompile
+
 plugins {
     id("gradlebuild.internal.kotlin")
     id("gradlebuild.kotlin-dsl-plugin-bundle-integ-tests")
@@ -30,3 +32,9 @@ dependencies {
 }
 
 testFilesCleanup.reportOnly = true
+
+tasks.withType(KotlinCompile::class).configureEach {
+    kotlinOptions { // Deprecated non-lazy configuration options
+        freeCompilerArgs += listOf("-Xskip-prerelease-check")
+    }
+}
