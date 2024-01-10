@@ -3,6 +3,11 @@ plugins {
     id("gradlebuild.cache-miss-monitor")
 }
 
+repositories {
+    mavenLocal()
+    gradlePluginPortal()
+}
+
 description = "Provides plugins that are used by Gradle subprojects"
 
 tasks.register("check") {
