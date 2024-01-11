@@ -162,7 +162,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-        """.trimIndent()
+"""
 
     protected
     val repositoriesBlock
