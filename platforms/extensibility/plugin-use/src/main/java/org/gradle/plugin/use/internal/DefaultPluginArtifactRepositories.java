@@ -43,6 +43,7 @@ class DefaultPluginArtifactRepositories implements PluginArtifactRepositories {
             repositoryHandler.add(new PluginArtifactRepository(repository));
         }
         if (repositoryHandler.isEmpty()) {
+            repositoryHandler.mavenLocal();
             repositoryHandler.gradlePluginPortal();
         }
     }
