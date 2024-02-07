@@ -59,6 +59,7 @@ abstract class AbstractKotlinIntegrationTest : AbstractIntegrationTest() {
             beforeSettings { settings ->
                 settings.pluginManagement {
                     repositories {
+                        mavenLocal()
                         $testRepositories
                         gradlePluginPortal()
                     }
