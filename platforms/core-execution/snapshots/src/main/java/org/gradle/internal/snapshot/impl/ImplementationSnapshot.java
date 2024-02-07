@@ -33,6 +33,7 @@ import java.util.Optional;
  * Identifies a type in a classloader hierarchy. The type is identified by its name,
  * the classloader hierarchy by its hash code.
  */
+@SuppressWarnings("unused")
 public abstract class ImplementationSnapshot implements ValueSnapshot {
 
     private static final String GENERATED_LAMBDA_CLASS_SUFFIX = "$$Lambda";
@@ -101,7 +102,7 @@ public abstract class ImplementationSnapshot implements ValueSnapshot {
     }
 
     private static boolean isLambdaClassName(String className) {
-        return className.contains(GENERATED_LAMBDA_CLASS_SUFFIX);
+        return false; // className.contains(GENERATED_LAMBDA_CLASS_SUFFIX);
     }
 
     protected ImplementationSnapshot(String classIdentifier) {
