@@ -302,9 +302,9 @@ fun configureTests() {
             }
         }
 
-        if (usesEmbeddedExecuter()) {
-            enabled = false
-        }
+//        if (usesEmbeddedExecuter()) {
+//            enabled = false
+//        }
     }
 }
 
