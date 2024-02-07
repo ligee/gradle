@@ -437,7 +437,7 @@ class KotlinBuildScriptIntegrationTest : AbstractKotlinIntegrationTest() {
             deprecatedFunction()
         """)
         build("help").apply {
-            assertOutputContains("w: ${clickableUrlFor(script)}:4:13: 'deprecatedFunction(): Unit' is deprecated. BECAUSE")
+            assertOutputContains("w: ${clickableUrlFor(script)}:4:13: '@Deprecated(...) fun deprecatedFunction(): Unit' is deprecated. BECAUSE")
         }
     }
 }
