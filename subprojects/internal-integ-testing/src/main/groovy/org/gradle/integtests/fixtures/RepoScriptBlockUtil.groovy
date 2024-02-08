@@ -111,6 +111,7 @@ class RepoScriptBlockUtil {
     static String mavenCentralRepository(GradleDsl dsl = GROOVY) {
         return """
             repositories {
+                mavenLocal()
                 ${mavenCentralRepositoryDefinition(dsl)}
             }
         """

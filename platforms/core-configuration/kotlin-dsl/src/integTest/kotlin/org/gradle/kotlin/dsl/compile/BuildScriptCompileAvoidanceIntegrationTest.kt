@@ -537,6 +537,7 @@ class BuildScriptCompileAvoidanceIntegrationTest : AbstractCompileAvoidanceInteg
                     id("java-library")
                 }
                 repositories {
+                    mavenLocal()
                     mavenCentral()
                 }
             """

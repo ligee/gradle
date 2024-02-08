@@ -35,6 +35,7 @@ trait KotlinDslTestProjectInitiation {
 
     String repositoriesBlock = """
         repositories {
+            mavenLocal()
             ${RepoScriptBlockUtil.gradlePluginRepositoryDefinition(GradleDsl.KOTLIN)}
         }
     """.stripIndent()

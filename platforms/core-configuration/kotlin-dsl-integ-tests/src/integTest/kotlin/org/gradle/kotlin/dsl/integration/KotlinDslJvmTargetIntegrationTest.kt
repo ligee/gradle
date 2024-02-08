@@ -135,6 +135,7 @@ class KotlinDslJvmTargetIntegrationTest : AbstractKotlinIntegrationTest() {
                 implementation("test:utils:1.0")
             }
             repositories {
+                mavenLocal()
                 maven(url = "${mavenRepo.uri}")
                 gradlePluginPortal()
             }
