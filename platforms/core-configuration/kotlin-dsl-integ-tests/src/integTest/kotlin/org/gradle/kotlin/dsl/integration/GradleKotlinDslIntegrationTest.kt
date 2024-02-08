@@ -424,7 +424,7 @@ class GradleKotlinDslIntegrationTest : AbstractKotlinIntegrationTest() {
 
         assertThat(
             buildFailureOutput("tasks"),
-            containsString("e: ${clickableUrlFor(buildFile)}:3:44: Unresolved reference: 'fooBarVersion'")
+            containsString("e: ${clickableUrlFor(buildFile)}:3:44: Unresolved reference 'fooBarVersion'")
         )
     }
 
