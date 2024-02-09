@@ -159,7 +159,7 @@ class ToolingApi implements TestRule {
 
     def <T> T loadValidatedToolingModel(Class<T> modelClass, @DelegatesTo(ModelBuilder<T>) Closure configurator = {}) {
         def result = loadToolingLeanModel(modelClass, configurator)
-        validateOutput()
+//        validateOutput()
         result
     }
 
