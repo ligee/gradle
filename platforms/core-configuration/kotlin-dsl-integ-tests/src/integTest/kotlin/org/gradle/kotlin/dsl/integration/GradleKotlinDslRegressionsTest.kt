@@ -156,7 +156,7 @@ class GradleKotlinDslRegressionsTest : AbstractKotlinIntegrationTest() {
         result.assertHasFailure("Execution failed for task ':compileKotlin'.") {
             it.assertHasCause("Compilation error. See log for more details")
         }
-        result.assertHasErrorOutput("src/main/kotlin/code.kt:6:48 Null can not be a value of a non-null type '@Nullable() S & Any'")
+        result.assertHasErrorOutput("src/main/kotlin/code.kt:6:48 Null cannot be a value of a non-null type '@Nullable() S & Any'")
     }
 
     @Test
@@ -212,7 +212,7 @@ class GradleKotlinDslRegressionsTest : AbstractKotlinIntegrationTest() {
             apply(from = "applied.gradle.kts")
         """)
         buildAndFail("help").apply {
-            assertHasErrorOutput("Unresolved reference: sourceCompatibility")
+            assertHasErrorOutput("Unresolved reference 'sourceCompatibility'")
         }
 
         withFile("applied.gradle.kts", """
@@ -222,7 +222,7 @@ class GradleKotlinDslRegressionsTest : AbstractKotlinIntegrationTest() {
             println(java.sourceCompatibility)
         """)
         buildAndFail("help").apply {
-            assertHasErrorOutput("Unresolved reference: sourceCompatibility")
+            assertHasErrorOutput("Unresolved reference 'sourceCompatibility'")
         }
     }
 }
