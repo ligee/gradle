@@ -28,15 +28,19 @@ import org.jetbrains.kotlin.assignment.plugin.AssignmentConfigurationKeys
 import org.jetbrains.kotlin.assignment.plugin.CliAssignPluginResolutionAltererExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.CompilerSystemProperties.KOTLIN_COMPILER_ENVIRONMENT_KEEPALIVE_PROPERTY
+import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoot
 import org.jetbrains.kotlin.cli.common.config.addKotlinSourceRoots
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocation
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.common.messages.MessageUtil
+import org.jetbrains.kotlin.cli.common.modules.ModuleBuilder
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
+import org.jetbrains.kotlin.cli.jvm.compiler.FirKotlinToJvmBytecodeCompiler
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinCoreEnvironment
 import org.jetbrains.kotlin.cli.jvm.compiler.KotlinToJVMBytecodeCompiler.compileBunchOfSources
+import org.jetbrains.kotlin.cli.jvm.compiler.VfsBasedProjectEnvironment
 import org.jetbrains.kotlin.cli.jvm.config.addJvmClasspathRoot
 import org.jetbrains.kotlin.cli.jvm.config.addJvmSdkRoots
 import org.jetbrains.kotlin.codegen.CompilationException
@@ -44,6 +48,8 @@ import org.jetbrains.kotlin.com.intellij.openapi.Disposable
 import org.jetbrains.kotlin.com.intellij.openapi.project.Project
 import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer.dispose
 import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer.newDisposable
+import org.jetbrains.kotlin.com.intellij.openapi.vfs.StandardFileSystems
+import org.jetbrains.kotlin.com.intellij.openapi.vfs.VirtualFileManager
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.jetbrains.kotlin.config.AnalysisFlags
 import org.jetbrains.kotlin.config.ApiVersion
@@ -75,6 +81,7 @@ import org.jetbrains.kotlin.scripting.compiler.plugin.ScriptingCompilerConfigura
 import org.jetbrains.kotlin.scripting.compiler.plugin.ScriptingK2CompilerPluginRegistrar
 import org.jetbrains.kotlin.scripting.compiler.plugin.impl.ScriptJvmCompilerFromEnvironment
 import org.jetbrains.kotlin.scripting.compiler.plugin.toCompilerMessageSeverity
+import org.jetbrains.kotlin.scripting.configuration.ScriptingConfigurationKeys
 import org.jetbrains.kotlin.scripting.definitions.ScriptDefinition
 import org.jetbrains.kotlin.utils.PathUtil
 import org.slf4j.Logger
@@ -162,20 +169,33 @@ fun compileKotlinScriptToDirectory(
     pathTranslation: (String) -> String
 ): String {
 
-    compileKotlinScriptModuleTo(
-        outputDirectory,
-        compilerOptions,
-        "buildscript",
-        listOf(scriptFile.path),
-        scriptDef,
-        classPath,
-        messageCollectorFor(logger, compilerOptions.allWarningsAsErrors, pathTranslation)
-    )
+    val messageCollector = messageCollectorFor(logger, compilerOptions.allWarningsAsErrors, pathTranslation)
+    withRootDisposable {
+        withCompilationExceptionHandler(messageCollector) {
+            val configuration = compilerConfigurationForScriptModule(messageCollector, compilerOptions, outputDirectory, "buildscript")
+
+            val environment = kotlinCoreEnvironmentFor(configuration)
+
+            val host = BasicJvmScriptingHost(
+                compiler = JvmScriptCompiler(scriptDef.hostConfiguration, ScriptJvmCompilerFromEnvironment(environment)),
+                evaluator = BasicJvmScriptClassFilesGenerator(outputDirectory)
+            )
+            val compilationConfiguration = scriptDef.compilationConfiguration.with {
+                updateClasspath(classPath.toList())
+            }
+            listOf(scriptFile.path).forEach {
+                val script = File(it).toScriptSource()
+                host.eval(script, compilationConfiguration, scriptDef.evaluationConfiguration)
+                    .reportToMessageCollectorAndThrowOnErrors(script, messageCollector)
+            }
+        }
+    }
 
     return NameUtils.getScriptNameForFile(scriptFile.name).asString()
 }
 
 
+// TODO: replace with `KotlinCompile` task (see #28014)
 private
 fun compileKotlinScriptModuleTo(
     outputDirectory: File,
@@ -188,32 +208,46 @@ fun compileKotlinScriptModuleTo(
 ) {
     withRootDisposable {
         withCompilationExceptionHandler(messageCollector) {
-            val configuration = compilerConfigurationFor(messageCollector, compilerOptions).apply {
-                put(RETAIN_OUTPUT_IN_MEMORY, false)
-                put(OUTPUT_DIRECTORY, outputDirectory)
-                setModuleName(moduleName)
-                addScriptingCompilerComponents()
-                put(CommonConfigurationKeys.USE_FIR, true)
-                add(SamWithReceiverConfigurationKeys.ANNOTATION, "org.gradle.api.HasImplicitReceiver")
+            val module = ModuleBuilder(moduleName, outputDirectory.path, "java-production")
+            val configuration = compilerConfigurationForScriptModule(messageCollector, compilerOptions, outputDirectory, moduleName).apply {
+                addScriptDefinition(scriptDef)
+                scriptFiles.forEach { addKotlinSourceRoot(it) }
+                classPath.forEach { addJvmClasspathRoot(it) }
             }
 
-            val environment = kotlinCoreEnvironmentFor(configuration)
+            val environment = kotlinCoreEnvironmentFor(configuration).apply {
+                HasImplicitReceiverCompilerPlugin.apply(project)
+                KotlinAssignmentCompilerPlugin.apply(project)
+            }
 
-            val host = BasicJvmScriptingHost(
-                compiler = JvmScriptCompiler(scriptDef.hostConfiguration, ScriptJvmCompilerFromEnvironment(environment)),
-                evaluator = BasicJvmScriptClassFilesGenerator(outputDirectory)
+            val projectEnvironment =
+                VfsBasedProjectEnvironment(
+                    environment.project,
+                    VirtualFileManager.getInstance().getFileSystem(StandardFileSystems.FILE_PROTOCOL)
+                ) { environment.createPackagePartProvider(it) }
+
+            FirKotlinToJvmBytecodeCompiler.compileModulesUsingFrontendIRAndPsi(
+                projectEnvironment,
+                configuration,
+                messageCollector,
+                environment.getSourceFiles(),
+                null,
+                module
             )
-            val compilationConfiguration = scriptDef.compilationConfiguration.with {
-                updateClasspath(classPath.toList())
-            }
-            scriptFiles.forEach {
-                val script = File(it).toScriptSource()
-                host.eval(script, compilationConfiguration, scriptDef.evaluationConfiguration)
-                    .reportToMessageCollectorAndThrowOnErrors(script, messageCollector)
-            }
+
         }
     }
 }
+
+private fun compilerConfigurationForScriptModule(messageCollector: LoggingMessageCollector, compilerOptions: KotlinCompilerOptions, outputDirectory: File, moduleName: String) =
+    compilerConfigurationFor(messageCollector, compilerOptions).apply {
+        put(RETAIN_OUTPUT_IN_MEMORY, false)
+        put(OUTPUT_DIRECTORY, outputDirectory)
+        setModuleName(moduleName)
+        addScriptingCompilerComponents()
+        put(CommonConfigurationKeys.USE_FIR, true)
+        add(SamWithReceiverConfigurationKeys.ANNOTATION, "org.gradle.api.HasImplicitReceiver")
+    }
 
 private fun ResultWithDiagnostics<*>.reportToMessageCollectorAndThrowOnErrors(script: SourceCode, messageCollector: MessageCollector): ResultWithDiagnostics<*> = also {
     val lines = if (it.reports.isEmpty()) null else script.text.lines()
@@ -475,6 +509,10 @@ fun CompilerConfiguration.addScriptingCompilerComponents() {
     add(AssignmentConfigurationKeys.ANNOTATION, SupportsKotlinAssignmentOverloading::class.qualifiedName!!)
 }
 
+private
+fun CompilerConfiguration.addScriptDefinition(scriptDef: ScriptDefinition) {
+    add(ScriptingConfigurationKeys.SCRIPT_DEFINITIONS, scriptDef)
+}
 
 private
 fun Disposable.kotlinCoreEnvironmentFor(configuration: CompilerConfiguration): KotlinCoreEnvironment {
