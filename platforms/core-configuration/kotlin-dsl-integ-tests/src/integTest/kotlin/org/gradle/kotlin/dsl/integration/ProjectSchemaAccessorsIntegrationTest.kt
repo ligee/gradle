@@ -467,7 +467,7 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractKotlinIntegrationTest() {
                     withFile(
                         "my/extensions.kt",
                         """
-                        package my
+                        package my1
                         open class App { lateinit var name: String }
                         open class Lib { lateinit var name: String }
                         """
@@ -476,7 +476,7 @@ class ProjectSchemaAccessorsIntegrationTest : AbstractKotlinIntegrationTest() {
                         "app-or-lib.gradle.kts",
                         """
                         val my: String? by project
-                        val extensionType = if (my == "app") my.App::class else my.Lib::class
+                        val extensionType = if (my == "app") my1.App::class else my1.Lib::class
                         extensions.create("my", extensionType)
                         """
                     )
