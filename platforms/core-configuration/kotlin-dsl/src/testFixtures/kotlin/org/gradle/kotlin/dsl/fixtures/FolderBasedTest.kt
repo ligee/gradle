@@ -54,7 +54,7 @@ class FoldersDsl(val root: File) {
     operator fun String.unaryPlus(): File =
         canonicalFile(this).apply { mkdirs() }
 
-    fun withFile(fileName: String, content: String = ""): File =
+    fun withFile(fileName: String, content: String = " "): File =
         canonicalFile(fileName).apply {
             parentFile.mkdirs()
             writeText(content)

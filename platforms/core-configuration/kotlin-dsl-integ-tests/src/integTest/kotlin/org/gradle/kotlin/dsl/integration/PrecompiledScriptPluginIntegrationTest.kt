@@ -310,7 +310,7 @@ class PrecompiledScriptPluginIntegrationTest : AbstractKotlinIntegrationTest() {
     @Issue("https://github.com/gradle/gradle/issues/17831")
     fun `precompiled script plugins in resources are ignored`() {
         withKotlinDslPlugin()
-        withPrecompiledKotlinScript("correct.gradle.kts", "")
+        withPrecompiledKotlinScript("correct.gradle.kts", " ")
         file("src/main/resources/invalid.gradle.kts", "DOES NOT COMPILE")
         compileKotlin()
         val generated = file("build/generated-sources/kotlin-dsl-plugins/kotlin").walkTopDown().filter { it.isFile }.map { it.name }

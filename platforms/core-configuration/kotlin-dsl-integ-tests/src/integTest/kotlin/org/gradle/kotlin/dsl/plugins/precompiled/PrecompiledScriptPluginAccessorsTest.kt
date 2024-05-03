@@ -486,7 +486,7 @@ class PrecompiledScriptPluginAccessorsTest : AbstractPrecompiledScriptPluginTest
 
         withKotlinDslPlugin()
 
-        withPrecompiledKotlinScript("no-plugins.gradle.kts", "")
+        withPrecompiledKotlinScript("no-plugins.gradle.kts", " ")
         withPrecompiledKotlinScript(
             "java-plugin.gradle.kts",
             """

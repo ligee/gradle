@@ -428,7 +428,7 @@ abstract class AbstractBinaryCompatibilityTest {
         assertTrue("Output should contain text:\n'$text',\nbut given text was not matched.\n", output.contains(text))
 
     protected
-    fun File.withFile(path: String, text: String = ""): File =
+    fun File.withFile(path: String, text: String = " "): File =
         resolve(path).apply {
             parentFile.mkdirs()
             writeText(text.trimIndent())
