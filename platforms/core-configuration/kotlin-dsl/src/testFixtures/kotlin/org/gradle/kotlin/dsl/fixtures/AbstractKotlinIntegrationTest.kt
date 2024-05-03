@@ -148,7 +148,7 @@ abstract class AbstractKotlinIntegrationTest : AbstractIntegrationTest() {
 
     protected
     open val defaultSettingsScript
-        get() = ""
+        get() = " "
 
     protected
     val repositoriesBlock
@@ -205,7 +205,7 @@ abstract class AbstractKotlinIntegrationTest : AbstractIntegrationTest() {
         withFile("$baseDir/build.gradle.kts", script, produceFile)
 
     protected
-    fun withFile(fileName: String, text: String = "", produceFile: (String) -> File = ::newFile) =
+    fun withFile(fileName: String, text: String = " ", produceFile: (String) -> File = ::newFile) =
         writeFile(produceFile(fileName), text)
 
     private

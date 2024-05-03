@@ -258,7 +258,7 @@ class KotlinScriptDependenciesResolverTest : AbstractKotlinIntegrationTest() {
     fun `report file warning on early build configuration failure when reusing previous dependencies`() {
 
         withKotlinBuildSrc()
-        val buildSrcKotlinSource = withFile("buildSrc/src/main/kotlin/Foo.kt", "")
+        val buildSrcKotlinSource = withFile("buildSrc/src/main/kotlin/Foo.kt", " ")
 
         val editedScript = withBuildScript("")
 

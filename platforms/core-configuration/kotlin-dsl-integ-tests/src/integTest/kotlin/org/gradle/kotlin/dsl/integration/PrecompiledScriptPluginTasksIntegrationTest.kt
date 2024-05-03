@@ -157,7 +157,7 @@ class PrecompiledScriptPluginTasksIntegrationTest : AbstractKotlinIntegrationTes
             """
         )
 
-        val fooScript = withFile("src/main/kotlin/foo.gradle.kts", "")
+        val fooScript = withFile("src/main/kotlin/foo.gradle.kts", " ")
 
         build("generateScriptPluginAdapters")
         assertTrue(existing("build/generated-sources/kotlin-dsl-plugins/kotlin/FooPlugin.kt").isFile)
@@ -258,7 +258,7 @@ class PrecompiledScriptPluginTasksIntegrationTest : AbstractKotlinIntegrationTes
         withDefaultSettings().appendText("""include("producer", "consumer")""")
         withFile("producer/build.gradle.kts", """plugins { java }""")
         withKotlinDslPluginIn("consumer").appendText("""dependencies { implementation(project(":producer")) }""")
-        withFile("consumer/src/main/kotlin/some.gradle.kts", "")
+        withFile("consumer/src/main/kotlin/some.gradle.kts", " ")
         build(":consumer:classes").apply {
             assertTaskExecuted(":consumer:compilePluginsBlocks")
             assertNotOutput("w: Classpath entry points to a non-existent location")

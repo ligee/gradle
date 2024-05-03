@@ -94,7 +94,7 @@ class SettingsSchemaAccessorsIntegrationTest : AbstractKotlinIntegrationTest() {
         result.assertOutputContains("It's 42!")
 
         // when: plugin changes in an incompatible way
-        withFile("plugins/src/main/kotlin/my-settings-plugin.settings.gradle.kts", "")
+        withFile("plugins/src/main/kotlin/my-settings-plugin.settings.gradle.kts", " ")
 
         // then:
         buildAndFail("ok").apply {

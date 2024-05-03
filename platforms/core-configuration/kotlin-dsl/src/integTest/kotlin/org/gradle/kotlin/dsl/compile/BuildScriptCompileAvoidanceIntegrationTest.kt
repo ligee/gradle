@@ -44,7 +44,7 @@ class BuildScriptCompileAvoidanceIntegrationTest : AbstractCompileAvoidanceInteg
         withDefaultSettingsIn("build-logic")
             .appendText("""rootProject.name = "build-logic"""")
         withKotlinDslPluginIn("build-logic")
-        withFile("build-logic/src/main/kotlin/my-plugin.gradle.kts", "")
+        withFile("build-logic/src/main/kotlin/my-plugin.gradle.kts", " ")
         val className = kotlinClassSourceFile("build-logic", """
             inline fun foo() { println("bar") }
         """)
